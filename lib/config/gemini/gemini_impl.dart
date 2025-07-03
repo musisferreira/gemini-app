@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:image_picker/image_picker.dart';
 
 sealed class Gemini {
   Future<String> getResponse(String prompt);
@@ -30,11 +31,28 @@ class GeminiImpl extends Gemini {
   // Stream
 
   @override
-  Stream<String> getResponseStream(String prompt) async* {
-    final body = jsonEncode({'prompt': prompt});
+  Stream<String> getResponseStream(
+    String prompt, {
+    List<XFile> files = const [],
+  }) async* {
+    final formData = FormData();
+    formData.fields.add(MapEntry('prompt', prompt));
+
+    if (files.isNotEmpty) {
+      for (final file in files) {
+        formData.files.add(
+          MapEntry(
+            'files',
+            await MultipartFile.fromFile(file.path, filename: file.name),
+          ),
+        );
+      }
+    }
+
+    //final body = jsonEncode({'prompt': prompt});
     final response = await _http.post(
       '/basic-prompt-stream',
-      data: body,
+      data: formData,
       options: Options(responseType: ResponseType.stream),
     );
     final stream = response.data.stream as Stream<List<int>>;
@@ -46,4 +64,3 @@ class GeminiImpl extends Gemini {
     }
   }
 }
-
