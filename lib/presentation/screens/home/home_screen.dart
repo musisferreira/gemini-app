@@ -7,7 +7,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Google Gemini'), centerTitle: true),
+      appBar: AppBar(
+        title: Text('Google Gemini'),
+        centerTitle: true,
+
+      ),
       body: ListView(
         children: [
           ListTile(
@@ -18,6 +22,16 @@ class HomeScreen extends StatelessWidget {
             title: const Text('Prompt básico a Gemini'),
             subtitle: const Text('Usando um modelo de Flash'),
             onTap: () => context.push('/basic-prompt'),
+          ),
+
+          ListTile(
+            leading: CircleAvatar(
+              backgroundColor: Colors.deepPurple,
+              child: Icon(Icons.history_outlined),
+            ),
+            title: const Text('Chat Conversational'),
+            subtitle: const Text('Mantener contexto de mensajes'),
+            onTap: () => context.push('/history-chat'),
           ),
         ],
       ),

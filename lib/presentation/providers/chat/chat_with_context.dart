@@ -19,6 +19,7 @@ class ChatWithContext extends _$ChatWithContext {
   // ignore: avoid_public_notifier_properties
   late User geminiUser;
 
+  // ignore: avoid_public_notifier_properties
   late String chatId;
 
   @override
