@@ -7,19 +7,24 @@ import 'package:uuid/uuid.dart';
 import '../../../config/gemini/gemini_impl.dart';
 import '../users/user_provider.dart';
 
-part 'basic_chat.g.dart';
+part 'chat_with_context.g.dart';
 
-@riverpod
-class BasicChat extends _$BasicChat {
+final uuid = Uuid();
+
+@Riverpod(keepAlive: true)
+class ChatWithContext extends _$ChatWithContext {
   // ignore: avoid_public_notifier_properties
   final gemini = GeminiImpl();
 
   // ignore: avoid_public_notifier_properties
   late User geminiUser;
 
+  late String chatId;
+
   @override
   List<Message> build() {
     geminiUser = ref.read(geminiUserProvider);
+    chatId = uuid.v4();
     return [];
   }
 
@@ -38,7 +43,6 @@ class BasicChat extends _$BasicChat {
 
   void _addTextMessage(PartialText partialText, User author) {
     _createTextMessage(partialText.text, author);
-    //_geminiTextResponse(partialText.text);
     _geminiTextResponseStream(partialText.text);
   }
 
@@ -52,10 +56,8 @@ class BasicChat extends _$BasicChat {
     }
     await Future.delayed(const Duration(milliseconds: 10));
     _createTextMessage(partialText.text, author);
-    //_geminiTextResponse(partialText.text);
     _geminiTextResponseStream(partialText.text, images: images);
   }
-
 
   void _geminiTextResponseStream(
     String prompt, {
@@ -63,7 +65,7 @@ class BasicChat extends _$BasicChat {
   }) async {
     _createTextMessage('Gemeni está pensando...', geminiUser);
 
-    gemini.getResponseStream(prompt, files: images).listen((responseChunk) {
+    gemini.getChatStream(prompt, chatId, files: images).listen((responseChunk) {
       if (responseChunk.isEmpty) return;
 
       final updateMessages = [...state];
@@ -74,8 +76,18 @@ class BasicChat extends _$BasicChat {
       updateMessages[0] = updateMessage;
       state = updateMessages;
     });
+  }
 
-    //_createTextMessage(textResponse, geminiUser);
+  // Helper methods
+  void newChat() {
+    chatId = uuid.v4();
+    state = [];
+  }
+
+  void loadPreviousMessages(String chatId) {
+
+    //TODO: load previous messages from chatId
+
   }
 
   void _createTextMessage(String text, User author) {
@@ -101,5 +113,4 @@ class BasicChat extends _$BasicChat {
 
     state = [message, ...state];
   }
-
 }
